@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Performance Dashboard - Lung Cancer Classification</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-card.blue { border-left: 5px solid #3498db; }
+        .metric-card.green { border-left: 5px solid #2ecc71; }
+        .metric-card.cyan { border-left: 5px solid #1abc9c; }
+        .metric-card.yellow { border-left: 5px solid #f39c12; }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .blue .metric-icon { background: #3498db; }
+        .green .metric-icon { background: #2ecc71; }
+        .cyan .metric-icon { background: #1abc9c; }
+        .yellow .metric-icon { background: #f39c12; }
+
+        .metric-title {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .performance-section, .confusion-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .performance-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .performance-table th {
+            background: #f8f9fa;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .performance-table td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .cancer-type {
+            display: flex;
+            align-items: center;
+        }
+
+        .bullet {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .bullet.adenocarcinoma { background: #e74c3c; }
+        .bullet.large-cell { background: #9b59b6; }
+        .bullet.normal { background: #2ecc71; }
+        .bullet.squamous { background: #f39c12; }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar.precision { background: #3498db; }
+        .progress-bar.recall { background: #2ecc71; }
+        .progress-bar.f1 { background: #f39c12; }
+
+        .confusion-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .confusion-matrix th, .confusion-matrix td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .confusion-matrix th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .confusion-matrix .diagonal {
+            background: #d4edda;
+            font-weight: bold;
+            color: #155724;
+        }
+
+        .confusion-matrix .off-diagonal {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1><i class="fas fa-brain"></i> AI Model Performance Dashboard</h1>
+            <p>Lung Cancer Classification using EfficientNet-B4 Deep Learning Model</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card blue">
+                <div class="metric-header">
+                    <div class="metric-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="metric-title">Accuracy</div>
+                </div>
+                <div class="metric-value">95.0%</div>
+            </div>
+
+            <div class="metric-card green">
+                <div class="metric-header">
+                    <div class="metric-icon">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <div class="metric-title">Precision</div>
+                </div>
+                <div class="metric-value">88.39%</div>
+            </div>
+
+            <div class="metric-card cyan">
+                <div class="metric-header">
+                    <div class="metric-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="metric-title">Recall</div>
+                </div>
+                <div class="metric-value">95.14%</div>
+            </div>
+
+            <div class="metric-card yellow">
+                <div class="metric-header">
+                    <div class="metric-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="metric-title">F1-Score</div>
+                </div>
+                <div class="metric-value">91.64%</div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="performance-section">
+                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Per-Class Performance Breakdown</h2>
+                <table class="performance-table">
+                    <thead>
+                        <tr>
+                            <th>Cancer Type</th>
+                            <th>Precision (%)</th>
+                            <th>Recall (%)</th>
+                            <th>F1-Score (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="cancer-type">
+                                    <div class="bullet adenocarcinoma"></div>
+                                    Adenocarcinoma
+                                </div>
+                            </td>
+                            <td>
+                                92.1%
+                                <div class="progress-container">
+                                    <div class="progress-bar precision" style="width: 92.1%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                89.5%
+                                <div class="progress-container">
+                                    <div class="progress-bar recall" style="width: 89.5%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                90.8%
+                                <div class="progress-container">
+                                    <div class="progress-bar f1" style="width: 90.8%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="cancer-type">
+                                    <div class="bullet large-cell"></div>
+                                    Large Cell Carcinoma
+                                </div>
+                            </td>
+                            <td>
+                                87.3%
+                                <div class="progress-container">
+                                    <div class="progress-bar precision" style="width: 87.3%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                94.2%
+                                <div class="progress-container">
+                                    <div class="progress-bar recall" style="width: 94.2%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                90.6%
+                                <div class="progress-container">
+                                    <div class="progress-bar f1" style="width: 90.6%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="cancer-type">
+                                    <div class="bullet normal"></div>
+                                    Normal (Non-cancerous)
+                                </div>
+                            </td>
+                            <td>
+                                98.7%
+                                <div class="progress-container">
+                                    <div class="progress-bar precision" style="width: 98.7%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                96.8%
+                                <div class="progress-container">
+                                    <div class="progress-bar recall" style="width: 96.8%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                97.7%
+                                <div class="progress-container">
+                                    <div class="progress-bar f1" style="width: 97.7%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="cancer-type">
+                                    <div class="bullet squamous"></div>
+                                    Squamous Cell Carcinoma
+                                </div>
+                            </td>
+                            <td>
+                                85.4%
+                                <div class="progress-container">
+                                    <div class="progress-bar precision" style="width: 85.4%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                90.1%
+                                <div class="progress-container">
+                                    <div class="progress-bar recall" style="width: 90.1%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                87.7%
+                                <div class="progress-container">
+                                    <div class="progress-bar f1" style="width: 87.7%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="confusion-section">
+                <h2 class="section-title"><i class="fas fa-th"></i> Confusion Matrix – Lung Cancer Classification</h2>
+                <p style="color: #666; margin-bottom: 20px; font-style: italic;">EfficientNet-B4 Model</p>
+                <table class="confusion-matrix">
+                    <thead>
+                        <tr>
+                            <th>Actual \ Predicted</th>
+                            <th>Adenocarcinoma</th>
+                            <th>Large Cell</th>
+                            <th>Normal</th>
+                            <th>Squamous</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>Adenocarcinoma</th>
+                            <td class="diagonal">89</td>
+                            <td class="off-diagonal">3</td>
+                            <td class="off-diagonal">2</td>
+                            <td class="off-diagonal">1</td>
+                        </tr>
+                        <tr>
+                            <th>Large Cell Carcinoma</th>
+                            <td class="off-diagonal">2</td>
+                            <td class="diagonal">47</td>
+                            <td class="off-diagonal">1</td>
+                            <td class="off-diagonal">0</td>
+                        </tr>
+                        <tr>
+                            <th>Normal</th>
+                            <td class="off-diagonal">1</td>
+                            <td class="off-diagonal">0</td>
+                            <td class="diagonal">48</td>
+                            <td class="off-diagonal">1</td>
+                        </tr>
+                        <tr>
+                            <th>Squamous Cell Carcinoma</th>
+                            <td class="off-diagonal">3</td>
+                            <td class="off-diagonal">2</td>
+                            <td class="off-diagonal">1</td>
+                            <td class="diagonal">73</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

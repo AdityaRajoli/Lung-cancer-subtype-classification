@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Performance - Lung Cancer Classifier{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-chart-bar text-primary me-2"></i>
+                Model Performance Analysis
+            </h2>
+        </div>
+    </div>
+
+    <!-- Overall Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-bullseye fa-2x mb-2"></i>
+                    <h4>{{ "%.1f"|format(metrics.accuracy) }}%</h4>
+                    <p class="mb-0">Accuracy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-crosshairs fa-2x mb-2"></i>
+                    <h4>{{ "%.2f"|format(metrics.precision) }}%</h4>
+                    <p class="mb-0">Precision</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-search fa-2x mb-2"></i>
+                    <h4>{{ "%.2f"|format(metrics.recall) }}%</h4>
+                    <p class="mb-0">Recall</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-balance-scale fa-2x mb-2"></i>
+                    <h4>{{ "%.2f"|format(metrics.f1_score) }}%</h4>
+                    <p class="mb-0">F1-Score</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Per-Class Performance -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Per-Class Performance Breakdown
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Cancer Type</th>
+                                    <th>Precision (%)</th>
+                                    <th>Recall (%)</th>
+                                    <th>F1-Score (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for class_name, class_metrics in metrics.per_class_metrics.items() %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-dot-circle 
+                                        {% if 'Adenocarcinoma' in class_name %}text-danger
+                                        {% elif 'Large Cell' in class_name %}text-warning
+                                        {% elif 'Normal' in class_name %}text-success
+                                        {% else %}text-info{% endif %} me-2"></i>
+                                        {{ class_name }}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                     style="width: {{ class_metrics.precision }}%">
+                                                </div>
+                                            </div>
+                                            <span class="fw-bold">{{ "%.1f"|format(class_metrics.precision) }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                <div class="progress-bar bg-info" role="progressbar" 
+                                                     style="width: {{ class_metrics.recall }}%">
+                                                </div>
+                                            </div>
+                                            <span class="fw-bold">{{ "%.1f"|format(class_metrics.recall) }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" 
+                                                     style="width: {{ class_metrics.f1_score }}%">
+                                                </div>
+                                            </div>
+                                            <span class="fw-bold">{{ "%.1f"|format(class_metrics.f1_score) }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confusion Matrix -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-th me-2"></i>Confusion Matrix
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='images/confusion_matrix.png') }}" 
+                         alt="Confusion Matrix" class="img-fluid rounded" 
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkNvbmZ1c2lvbiBNYXRyaXggVW5hdmFpbGFibGU8L3RleHQ+PC9zdmc+'">
+                    <p class="mt-2 text-muted small">
+                        Confusion matrix visualization showing classification performance across all cancer types
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Information -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Model Architecture & Training Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Architecture Details:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-microchip text-primary me-2"></i><strong>Model:</strong> EfficientNet-B4</li>
+                                <li><i class="fas fa-layer-group text-primary me-2"></i><strong>Input Size:</strong> 224×224 pixels</li>
+                                <li><i class="fas fa-tags text-primary me-2"></i><strong>Classes:</strong> 4 (Multi-class classification)</li>
+                                <li><i class="fas fa-database text-primary me-2"></i><strong>Parameters:</strong> ~19M trainable parameters</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Training Configuration:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-chart-line text-success me-2"></i><strong>Loss Function:</strong> Focal Loss</li>
+                                <li><i class="fas fa-sync text-success me-2"></i><strong>Optimizer:</strong> AdamW with LR Scheduling</li>
+                                <li><i class="fas fa-images text-success me-2"></i><strong>Augmentation:</strong> Advanced data augmentation</li>
+                                <li><i class="fas fa-clock text-success me-2"></i><strong>Training Time:</strong> ~2-3 hours on GPU</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Insights -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Performance Insights
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="alert alert-success" role="alert">
+                                <h6><i class="fas fa-check-circle me-2"></i>Strengths</h6>
+                                <ul class="mb-0">
+                                    <li>Excellent overall accuracy (95.0%)</li>
+                                    <li>High precision for Normal cases (98.7%)</li>
+                                    <li>Balanced performance across cancer types</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-warning" role="alert">
+                                <h6><i class="fas fa-exclamation-triangle me-2"></i>Areas for Improvement</h6>
+                                <ul class="mb-0">
+                                    <li>Squamous cell carcinoma precision (85.4%)</li>
+                                    <li>Large cell carcinoma precision (87.3%)</li>
+                                    <li>Class imbalance handling</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-info" role="alert">
+                                <h6><i class="fas fa-info-circle me-2"></i>Clinical Relevance</h6>
+                                <ul class="mb-0">
+                                    <li>High sensitivity for cancer detection</li>
+                                    <li>Low false positive rate for normal cases</li>
+                                    <li>Suitable for screening assistance</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Medical Disclaimer:</strong> These performance metrics are based on test dataset evaluation. 
+                Clinical validation and regulatory approval are required before deployment in medical settings.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

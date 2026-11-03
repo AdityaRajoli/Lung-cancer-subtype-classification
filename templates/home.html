@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Lung Cancer Classifier{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="jumbotron bg-gradient-primary text-white p-5 rounded mb-4">
+                <h1 class="display-4">
+                    <i class="fas fa-lungs me-3"></i>
+                    Enhanced Clinical-Grade Lung Cancer Classifier
+                </h1>
+                <p class="lead">
+                    Advanced AI-powered diagnostic system for multi-class lung cancer classification from CT scans
+                </p>
+                <hr class="my-4 bg-white">
+                <p>
+                    Utilizing EfficientNet-B4 deep learning architecture with GPT-3.5 medical reporting capabilities
+                </p>
+                {% if session.user_type == 'primary' %}
+                <div class="alert alert-success mt-3" role="alert">
+                    <i class="fas fa-user-md me-2"></i>
+                    <strong>Welcome, Dr. admin!</strong> You have full access to all advanced features and medical reporting capabilities.
+                </div>
+                {% elif session.user_type == 'demo' %}
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Demo Mode:</strong> You're using demo access. For full features, login with primary credentials.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm medical-card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-microscope text-primary"></i>
+                    </div>
+                    <h5 class="card-title">AI Prediction</h5>
+                    <p class="card-text">
+                        Upload CT scan images for instant multi-class lung cancer classification with confidence scoring
+                    </p>
+                    <a href="{{ url_for('prediction') }}" class="btn btn-primary">
+                        <i class="fas fa-upload me-2"></i>Start Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm medical-card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-chart-line text-success"></i>
+                    </div>
+                    <h5 class="card-title">Performance Metrics</h5>
+                    <p class="card-text">
+                        View detailed model performance statistics, confusion matrix, and per-class accuracy metrics
+                    </p>
+                    <a href="{{ url_for('performance') }}" class="btn btn-success">
+                        <i class="fas fa-chart-bar me-2"></i>View Metrics
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm medical-card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-file-medical text-info"></i>
+                    </div>
+                    <h5 class="card-title">Medical Reports</h5>
+                    <p class="card-text">
+                        Generate comprehensive medical reports with AI-powered clinical recommendations and analysis
+                    </p>
+                    <a href="{{ url_for('prediction') }}" class="btn btn-info">
+                        <i class="fas fa-notes-medical me-2"></i>Generate Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>System Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Classification Categories:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-dot-circle text-danger me-2"></i>Adenocarcinoma</li>
+                                <li><i class="fas fa-dot-circle text-warning me-2"></i>Large Cell Carcinoma</li>
+                                <li><i class="fas fa-dot-circle text-info me-2"></i>Squamous Cell Carcinoma</li>
+                                <li><i class="fas fa-dot-circle text-success me-2"></i>Normal (Non-cancerous)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Key Features:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>EfficientNet-B4 Architecture</li>
+                                <li><i class="fas fa-check text-success me-2"></i>95.0% Accuracy Rate</li>
+                                <li><i class="fas fa-check text-success me-2"></i>GPT-3.5 Medical Reporting</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Real-time Predictions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Medical Disclaimer:</strong> This system is designed for research and educational purposes only. 
+                All predictions and reports should be reviewed by qualified medical professionals before making any clinical decisions.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

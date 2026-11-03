@@ -22,9 +22,9 @@ predictor = LungCancerPredictor()
 
 # ---------------- DEMO USERS ----------------
 USERS_DB = {
-    "rakshith": {
-        "password": "Rakshith@21",
-        "full_name": "Dr. Rakshith"
+    "admin": {
+        "password": "admin@17",
+        "full_name": "Dr. admin"
     }
 }
 
